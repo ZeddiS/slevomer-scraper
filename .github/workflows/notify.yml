@@ -1,0 +1,41 @@
+# Upozornění (sledované produkty, nové letáky, končící slevy, týdenní souhrn) → push.
+# Každou hodinu; noční klid (21–8 h Praha) a týdenní souhrn (neděle od 17 h) hlídá server.
+name: Upozornění
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+    inputs:
+      ignore_quiet:
+        description: "Poslat push i v nočním klidu (test)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: notify
+  cancel-in-progress: false
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # Jen standardní knihovna — žádné závislosti netřeba.
+      - name: Upozornění
+        env:
+          SLV_API_BASE: ${{ secrets.SLV_API_BASE }}
+          SLV_INGEST_SECRET: ${{ secrets.SLV_INGEST_SECRET }}
+        run: |
+          if [ "${{ github.event.inputs.ignore_quiet }}" = "true" ]; then
+            python -m slevomer_scraper.notify --ignore-quiet
+          else
+            python -m slevomer_scraper.notify
+          fi

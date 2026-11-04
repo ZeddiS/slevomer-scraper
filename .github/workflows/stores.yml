@@ -1,0 +1,27 @@
+# Týdenní import všech obchodů v ČR z OpenStreetMap → Slevoměr API.
+# Secrets (Settings → Secrets → Actions): SLV_API_BASE, SLV_INGEST_SECRET.
+name: Obchody (OSM)
+
+on:
+  schedule:
+    - cron: "17 2 * * 1"   # pondělí 02:17 UTC (mimo špičku Overpass)
+  workflow_dispatch:
+
+concurrency:
+  group: stores
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Import
+        env:
+          SLV_API_BASE: ${{ secrets.SLV_API_BASE }}
+          SLV_INGEST_SECRET: ${{ secrets.SLV_INGEST_SECRET }}
+        run: python -m slevomer_scraper.osm_stores

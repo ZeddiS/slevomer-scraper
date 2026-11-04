@@ -1,0 +1,63 @@
+# Letáky 6 řetězců → Slevoměr API, každý den v 00:00 a 12:00 (Europe/Prague).
+# GitHub cron je v UTC → spouštíme ve 22, 23, 10 a 11 UTC a první krok pustí dál
+# jen běh, kdy je v Praze 0 nebo 12 h (pokryje letní i zimní čas). Ruční spuštění běží vždy.
+name: Letáky
+
+on:
+  schedule:
+    - cron: "2 22,23,10,11 * * *"
+  workflow_dispatch:
+    inputs:
+      chains:
+        description: "Řetězce (čárkou), prázdné = všechny"
+        required: false
+      dry_run:
+        description: "Jen ověřit zdroje, nic neposílat na server"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: leaflets
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Je v Praze 00 nebo 12 hodin?
+        id: gate
+        run: |
+          H=$(TZ=Europe/Prague date +%H)
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "$H" = "00" ] || [ "$H" = "12" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Praha $H h — tento běh přeskakuji (druhý z páru zimní/letní čas)."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.gate.outputs.run == 'true'
+      - uses: actions/setup-python@v5
+        if: steps.gate.outputs.run == 'true'
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Závislosti
+        if: steps.gate.outputs.run == 'true'
+        run: pip install -r requirements.txt
+      - name: Letáky
+        if: steps.gate.outputs.run == 'true'
+        env:
+          SLV_API_BASE: ${{ secrets.SLV_API_BASE }}
+          SLV_INGEST_SECRET: ${{ secrets.SLV_INGEST_SECRET }}
+          TZ: Europe/Prague
+          CHAINS: ${{ github.event.inputs.chains }}
+          DRY_RUN: ${{ github.event.inputs.dry_run }}
+        run: |
+          args=()
+          [ -n "$CHAINS" ] && args+=(--chains "$CHAINS")
+          [ "$DRY_RUN" = "true" ] && args+=(--dry-run)
+          python -m slevomer_scraper.leaflets "${args[@]}"

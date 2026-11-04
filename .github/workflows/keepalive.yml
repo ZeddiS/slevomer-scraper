@@ -1,0 +1,26 @@
+# GitHub ve veřejném repu vypne naplánované běhy po 60 dnech bez aktivity v repu — a tím by se tiše
+# zastavily letáky i upozornění. Týdenní potvrzení přes API odpočet vynuluje; admin → Přehled navíc
+# varuje, když běhy dlouho nepřišly.
+name: Udržení naplánovaných běhů
+
+on:
+  schedule:
+    - cron: "41 6 * * 1"   # pondělí 06:41 UTC
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Potvrdit naplánované běhy
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for wf in leaflets notify eshop products stores keepalive; do
+            gh api -X PUT "repos/$GITHUB_REPOSITORY/actions/workflows/$wf.yml/enable"
+          done

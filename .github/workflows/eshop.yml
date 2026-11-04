@@ -1,0 +1,35 @@
+# Ceny z e-shopů (F6) — jen kde to podmínky a robots.txt dovolují (docs/DATA_SOURCES.md). Zatím Rossmann.
+# 1× denně brzy ráno, ~3 000 stránek pomalu po jedné (celý katalog zhruba za týden),
+# pak dohledání nespárovaných EAN v Open Food Facts. Když obchod odmítne přístup, běh skončí — nic neobcházíme.
+name: Ceny z e-shopů
+
+on:
+  schedule:
+    - cron: "11 2 * * *"   # 02:11 UTC (3–4 h v Praze), mimo špičku obchodu
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Kolik stránek produktů (test: 50)"
+        default: "3000"
+
+concurrency:
+  group: eshop
+  cancel-in-progress: false
+
+jobs:
+  rossmann:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # Jen standardní knihovna — žádné závislosti netřeba.
+      - name: Rossmann
+        env:
+          SLV_API_BASE: ${{ secrets.SLV_API_BASE }}
+          SLV_INGEST_SECRET: ${{ secrets.SLV_INGEST_SECRET }}
+          SLV_ESHOP_LIMIT: ${{ github.event.inputs.limit || '3000' }}
+          SLV_ESHOP_MINUTES: "120"
+        run: python -m slevomer_scraper.eshop

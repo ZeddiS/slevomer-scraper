@@ -1,0 +1,3 @@
+# Ověřené verze (2026-11-03). Ostatní moduly používají jen standardní knihovnu.
+pdfplumber==0.11.10
+pillow==12.2.0
