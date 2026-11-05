@@ -6,7 +6,7 @@ kde path je logická cesta API (např. "/v1/ingest/ping"), nezávislá na tom,
 jestli server běží s hezkými URL nebo přes /api/index.php/...
 
 Konfigurace z proměnných prostředí (v GitHub Actions = Secrets):
-  SLV_API_BASE       např. https://slevomer.zeddis.xyz/api/index.php
+  SLV_API_BASE       např. https://slevy.zeddis.xyz/api/index.php
   SLV_INGEST_SECRET  sdílené tajemství (min. 32 znaků)
 """
 from __future__ import annotations

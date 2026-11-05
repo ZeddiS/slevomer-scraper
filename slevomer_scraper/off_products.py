@@ -24,7 +24,7 @@ import urllib.request
 from .api import SlevomerApi
 
 SEARCH = "https://search.openfoodfacts.org/search"
-UA = "SlevomerScraper/0.2 (+https://slevomer.zeddis.xyz)"
+UA = "SlevomerScraper/0.2 (+https://slevy.zeddis.xyz)"
 FIELDS = ("code,product_name,product_name_cs,generic_name_cs,brands,quantity,product_quantity,product_quantity_unit,"
           "categories_tags,image_front_url,nutriscore_grade,nova_group,allergens_tags,labels_tags,"
           "ingredients_text_cs,ingredients_text,nutriments,countries_tags")

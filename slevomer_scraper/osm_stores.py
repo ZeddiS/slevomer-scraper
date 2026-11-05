@@ -28,7 +28,7 @@ MIRRORS = [
     "https://overpass.kumi.systems/api/interpreter",
     "https://overpass.private.coffee/api/interpreter",
 ]
-UA = "SlevomerScraper/0.2 (+https://slevomer.zeddis.xyz)"
+UA = "SlevomerScraper/0.2 (+https://slevy.zeddis.xyz)"
 
 # Po krajích (ISO 3166-2) — jeden dotaz na celou ČR veřejné Overpass servery
 # ve špičce odmítají („Dispatcher_Client … timeout“), menší dotazy projdou.

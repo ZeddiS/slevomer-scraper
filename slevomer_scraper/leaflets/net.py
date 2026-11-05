@@ -8,7 +8,7 @@ import time
 import urllib.error
 import urllib.request
 
-UA = "Mozilla/5.0 (compatible; SlevomerBot/0.2; +https://slevomer.zeddis.xyz/index.php/pro-obchody)"
+UA = "Mozilla/5.0 (compatible; SlevomerBot/0.2; +https://slevy.zeddis.xyz/index.php/pro-obchody)"
 
 
 class Blocked(RuntimeError):
